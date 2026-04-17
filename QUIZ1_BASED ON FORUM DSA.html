@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QUIZ 1 - Forum DSA 2026</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <style>
+        :root {
+            --primary-blue: #0a192f;
+            --accent-gold: #c5a059;
+            --cyber-green: #64ffda;
+            --text-light: #e6f1ff;
+            --card-bg: #112240;
+        }
+        body { background-color: var(--primary-blue); color: var(--text-light); font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+        header { text-align: center; border-bottom: 2px solid var(--accent-gold); width: 100%; max-width: 600px; margin-bottom: 20px; }
+        .card { background: var(--card-bg); padding: 25px; border-radius: 12px; width: 100%; max-width: 550px; margin-bottom: 20px; box-sizing: border-box; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        input, select { width: 100%; padding: 12px; margin: 10px 0; background: #1d3557; border: 1px solid #233554; color: white; border-radius: 5px; box-sizing: border-box; }
+        .btn { background: var(--accent-gold); color: var(--primary-blue); border: none; padding: 15px; width: 100%; font-weight: bold; cursor: pointer; border-radius: 5px; text-transform: uppercase; margin-top: 10px; }
+        .btn-secondary { background: transparent; color: var(--accent-gold); border: 1px solid var(--accent-gold); margin-top: 10px; }
+        .logout-btn { background: #ff4d4d; color: white; margin-top: 20px; border: none; }
+        #reader { width: 100%; background: black; border-radius: 8px; border: 2px solid var(--accent-gold); overflow: hidden; }
+        #qrcode { background: white; padding: 15px; display: inline-block; margin: 20px 0; border: 5px solid white; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 0.8rem; }
+        th, td { text-align: left; padding: 10px; border-bottom: 1px solid #233554; }
+        th { color: var(--cyber-green); }
+        .hidden { display: none !important; }
+        .hint { font-size: 0.7rem; color: #8892b0; margin-top: -5px; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+
+<header>
+    <h3>UPNM - FSTP [cite: 5, 13]</h3>
+    <h2>AI & CYBER SECURITY FORUM 2026 [cite: 8]</h2>
+    <p>Ballroom 2, MITEC | 23 April 2026 [cite: 38, 41]</p>
+</header>
+
+<section id="regSection" class="card">
+    <h3>User Registration [cite: 2]</h3>
+    <input type="text" id="regName" placeholder="Full Name (Unique ID)" required>
+    <input type="email" id="regEmail" placeholder="Email (must contain @)" required>
+    
+    <input type="password" id="regPass" placeholder="Create Password" required>
+    <p class="hint">Max 8 characters, must include exactly 2 numbers.</p>
+    
+    <select id="regRole" onchange="toggleCodeField()">
+        <option value="Audience">Audience</option>
+        <option value="Moderator">Moderator</option>
+        <option value="Admin">Admin</option>
+    </select>
+    <div id="codeGroup" class="hidden"><input type="password" id="regCode" placeholder="Enter Role Access Code"></div>
+    <button onclick="registerUser()" class="btn">Register</button>
+    <p style="text-align:center; font-size:0.8rem;">Already registered? <a href="#" onclick="showView('loginSection')" style="color:var(--cyber-green)">Login here</a></p>
+</section>
+
+<section id="loginSection" class="card hidden">
+    <h3>Secure Login</h3>
+    <input type="email" id="loginEmail" placeholder="Email Address">
+    <input type="password" id="loginPassword" placeholder="Password">
+    <button onclick="loginUser()" class="btn">Login</button>
+    <button onclick="showView('regSection')" class="btn btn-secondary">Register New Account</button>
+</section>
+
+<section id="audienceDashboard" class="card hidden" style="text-align: center;">
+    <h3>Welcome, <span id="userDisplayName"></span></h3>
+    <div id="qrcode"></div>
+    <p>Permanent QR: Valid for Forum DSA 2026 [cite: 5, 32]</p>
+    <button onclick="logout()" class="btn logout-btn">Logout</button>
+</section>
+
+<section id="moderatorDashboard" class="card hidden">
+    <h3>Moderator View [cite: 4]</h3>
+    <p>User: Kol Prof. Dr. Khairol Amali (B) [cite: 30]</p>
+    <div id="reader"></div>
+    <p id="scanStatus" style="color:var(--cyber-green); text-align:center; margin-top:10px; font-weight:bold;"></p>
+    <h4>Attendance List:</h4>
+    <table>
+        <thead><tr><th>Name</th><th>Email</th><th>Status</th></tr></thead>
+        <tbody id="attendanceTableBody"></tbody>
+    </table>
+    <button onclick="logout()" class="btn logout-btn">Logout</button>
+</section>
+
+<section id="adminDashboard" class="card hidden">
+    <h3>Admin View [cite: 4]</h3>
+    <table>
+        <thead><tr><th>Name (ID)</th><th>Email</th><th>Password</th><th>Role</th></tr></thead>
+        <tbody id="adminTableBody"></tbody>
+    </table>
+    <button onclick="logout()" class="btn logout-btn">Logout</button>
+</section>
+
+<script>
+    let usersDb = JSON.parse(localStorage.getItem('dsa_users')) || [];
+    let attendanceDb = JSON.parse(localStorage.getItem('dsa_attendance')) || [];
+    let html5QrCode;
+
+    const CODES = { Moderator: "MOD2026", Admin: "ADMIN99" };
+
+    function showView(id) {
+        ['regSection', 'loginSection', 'audienceDashboard', 'moderatorDashboard', 'adminDashboard'].forEach(v => document.getElementById(v).classList.add('hidden'));
+        document.getElementById(id).classList.remove('hidden');
+    }
+
+    function toggleCodeField() {
+        document.getElementById('codeGroup').className = (document.getElementById('regRole').value === "Audience") ? "hidden" : "";
+    }
+
+    function validatePassword(pass) {
+        // Check length
+        if (pass.length > 8) return { valid: false, msg: "Password must be maximum 8 characters." };
+        
+        // Count numbers using regex
+        const digitCount = (pass.match(/\d/g) || []).length;
+        if (digitCount !== 2) return { valid: false, msg: "Password must contain exactly 2 numbers." };
+        
+        return { valid: true };
+    }
+
+    function registerUser() {
+        const name = document.getElementById('regName').value.trim();
+        const email = document.getElementById('regEmail').value.trim();
+        const pass = document.getElementById('regPass').value;
+        const role = document.getElementById('regRole').value;
+        const code = document.getElementById('regCode').value;
+
+        // Validations
+        if (!email.includes("@")) return alert("Invalid Email: Missing '@' symbol.");
+        if(!name || !email || !pass) return alert("Fill all fields");
+        
+        const passCheck = validatePassword(pass);
+        if (!passCheck.valid) return alert(passCheck.msg);
+
+        if(usersDb.some(u => u.name.toLowerCase() === name.toLowerCase())) return alert("This Name ID is already taken!");
+        if(role !== "Audience" && code !== CODES[role]) return alert("Invalid Security Code");
+
+        usersDb.push({ name, email, pass, role });
+        localStorage.setItem('dsa_users', JSON.stringify(usersDb));
+        alert("Registration Successful!");
+        showView('loginSection');
+    }
+
+    function loginUser() {
+        const email = document.getElementById('loginEmail').value.trim();
+        const pass = document.getElementById('loginPassword').value;
+        const user = usersDb.find(u => u.email === email && u.pass === pass);
+
+        if (user) {
+            if (user.role === "Audience") {
+                showView('audienceDashboard');
+                document.getElementById('userDisplayName').innerText = user.name;
+                document.getElementById('qrcode').innerHTML = "";
+                new QRCode(document.getElementById("qrcode"), { text: user.name, width: 160, height: 160 });
+            } else if (user.role === "Moderator") {
+                showView('moderatorDashboard');
+                renderAttendance();
+                startScanner();
+            } else {
+                showView('adminDashboard');
+                document.getElementById('adminTableBody').innerHTML = usersDb.map(u => 
+                    `<tr><td>${u.name}</td><td>${u.email}</td><td>${u.pass}</td><td>${u.role}</td></tr>`).join('');
+            }
+        } else alert("Invalid Login Credentials.");
+    }
+
+    function startScanner() {
+        html5QrCode = new Html5Qrcode("reader");
+        html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 },
+            (decodedText) => {
+                const attendee = usersDb.find(u => u.name === decodedText);
+                if (attendee) {
+                    if (!attendanceDb.some(a => a.name === attendee.name)) {
+                        attendanceDb.push({ name: attendee.name, email: attendee.email });
+                        localStorage.setItem('dsa_attendance', JSON.stringify(attendanceDb));
+                        document.getElementById('scanStatus').innerText = "✅ Verified: " + attendee.name;
+                        renderAttendance();
+                    } else {
+                        document.getElementById('scanStatus').innerText = "⚠️ Already checked in.";
+                    }
+                }
+            }).catch(err => console.error("Scanner failed", err));
+    }
+
+    function renderAttendance() {
+        document.getElementById('attendanceTableBody').innerHTML = attendanceDb.map(a => 
+            `<tr><td>${a.name}</td><td>${a.email}</td><td style="color:var(--cyber-green)">PRESENT</td></tr>`).join('');
+    }
+
+    function logout() {
+        if (html5QrCode && html5QrCode.isScanning) {
+            html5QrCode.stop().then(() => showView('loginSection'));
+        } else {
+            showView('loginSection');
+        }
+    }
+</script>
+</body>
+</html>
