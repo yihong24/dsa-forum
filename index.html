@@ -3,166 +3,406 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QUIZ 1 - Forum DSA 2026</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <script src="https://unpkg.com/html5-qrcode"></script>
+    <title>DSA 2026 - Interactive Q&A Forum</title>
     <style>
         :root {
-            --primary-blue: #0a192f;
-            --accent-gold: #c5a059;
-            --cyber-green: #64ffda;
-            --text-light: #e6f1ff;
-            --card-bg: #112240;
+            /* AI / Cyberpunk Color Palette */
+            --bg-dark: #020617;
+            --card-dark: rgba(15, 23, 42, 0.7);
+            --ai-cyan: #00f3ff;
+            --ai-cyan-glow: rgba(0, 243, 255, 0.4);
+            --ai-purple: #bc13fe;
+            --ai-purple-glow: rgba(188, 19, 254, 0.4);
+            --text-light: #e2e8f0;
+            --text-dim: #94a3b8;
+            --error-red: #ef4444;
         }
-        body { background-color: var(--primary-blue); color: var(--text-light); font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; align-items: center; padding: 20px; }
-        header { text-align: center; border-bottom: 2px solid var(--accent-gold); width: 100%; max-width: 700px; margin-bottom: 20px; }
-        .card { background: var(--card-bg); padding: 25px; border-radius: 12px; width: 100%; max-width: 650px; margin-bottom: 20px; box-sizing: border-box; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        input, select { width: 100%; padding: 12px; margin: 10px 0; background: #1d3557; border: 1px solid #233554; color: white; border-radius: 5px; box-sizing: border-box; }
-        .btn { background: var(--accent-gold); color: var(--primary-blue); border: none; padding: 15px; width: 100%; font-weight: bold; cursor: pointer; border-radius: 5px; text-transform: uppercase; margin-top: 10px; }
-        .btn-secondary { background: transparent; color: var(--accent-gold); border: 1px solid var(--accent-gold); margin-top: 10px; }
-        .logout-btn { background: #ff4d4d; color: white; margin-top: 20px; border: none; }
-        #reader { width: 100%; background: black; border-radius: 8px; border: 2px solid var(--accent-gold); overflow: hidden; }
-        #qrcode { background: white; padding: 15px; display: inline-block; margin: 20px 0; border: 5px solid white; }
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 0.8rem; }
-        th, td { text-align: left; padding: 10px; border-bottom: 1px solid #233554; vertical-align: top; }
-        th { color: var(--cyber-green); background: rgba(100, 255, 218, 0.1); }
-        .hidden { display: none !important; }
-        .hint { font-size: 0.7rem; color: #8892b0; margin-top: -5px; margin-bottom: 10px; }
+
+        body {
+            /* Deep dark blue with glowing ambient corners */
+            background-color: var(--bg-dark);
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(188, 19, 254, 0.15), transparent 25%),
+                radial-gradient(circle at 85% 30%, rgba(0, 243, 255, 0.15), transparent 25%);
+            color: var(--text-light);
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            width: 100%;
+            max-width: 650px;
+            border-bottom: 1px solid var(--ai-cyan-glow);
+            position: relative;
+        }
+
+        header h2 {
+            color: white;
+            text-shadow: 0 0 10px var(--ai-cyan-glow);
+            letter-spacing: 2px;
+        }
         
-        /* Modal for Full Schedule */
-        .modal { background: rgba(10, 25, 47, 0.98); position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 100; overflow-y: auto; padding: 20px; box-sizing: border-box; }
-        .modal-content { max-width: 800px; margin: 0 auto; background: var(--card-bg); padding: 30px; border-radius: 12px; border: 1px solid var(--accent-gold); }
-        .panelist-info { font-size: 0.75rem; color: #ccd6f6; margin-top: 5px; }
-        .topic-text { color: var(--accent-gold); font-style: italic; display: block; margin-top: 3px; }
+        header h3 { color: var(--ai-cyan); }
+        header p { color: var(--text-dim); }
+
+        .card {
+            background: var(--card-dark);
+            padding: 30px;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 500px;
+            margin-bottom: 20px;
+            box-sizing: border-box;
+            /* Glassmorphism & Neon Borders */
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(0, 243, 255, 0.2);
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5), inset 0 0 15px rgba(0, 243, 255, 0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            box-shadow: 0 0 30px var(--ai-cyan-glow), inset 0 0 20px rgba(0, 243, 255, 0.1);
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 14px;
+            margin: 10px 0;
+            background: rgba(2, 6, 23, 0.8);
+            border: 1px solid rgba(188, 19, 254, 0.3);
+            color: var(--ai-cyan);
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 0.95rem;
+            transition: 0.3s all;
+        }
+
+        input::placeholder, textarea::placeholder {
+            color: #475569;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--ai-cyan);
+            box-shadow: 0 0 15px var(--ai-cyan-glow);
+            background: rgba(2, 6, 23, 1);
+        }
+
+        .btn {
+            background: linear-gradient(90deg, #00d2ff 0%, #3a7bd5 100%);
+            color: white;
+            border: none;
+            padding: 15px;
+            width: 100%;
+            font-weight: bold;
+            letter-spacing: 1px;
+            cursor: pointer;
+            border-radius: 8px;
+            text-transform: uppercase;
+            margin-top: 10px;
+            box-shadow: 0 0 15px rgba(0, 210, 255, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 25px rgba(0, 210, 255, 0.6);
+            background: linear-gradient(90deg, #3a7bd5 0%, #00d2ff 100%);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--ai-cyan);
+            border: 1px solid var(--ai-cyan);
+            box-shadow: none;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(0, 243, 255, 0.1);
+            box-shadow: 0 0 15px var(--ai-cyan-glow);
+        }
+
+        .logout-btn {
+            background: transparent;
+            border: 1px solid var(--error-red);
+            color: var(--error-red);
+            box-shadow: none;
+        }
+
+        .logout-btn:hover {
+            background: rgba(239, 68, 68, 0.1);
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
+        }
+
+        /* Q&A System Styling */
+        .q-item {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            border-left: 4px solid var(--ai-cyan);
+            background: rgba(2, 6, 23, 0.6);
+            transition: 0.3s all;
+        }
+
+        .q-pending { border-left-color: var(--ai-cyan); }
+        .q-done { border-left-color: #10b981; background: rgba(16, 185, 129, 0.1); }
+        .q-skipped { border-left-color: #ef4444; background: rgba(239, 68, 68, 0.1); }
+
+        .q-meta {
+            font-size: 0.75rem;
+            color: var(--ai-purple);
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .q-target {
+            font-size: 0.75rem;
+            color: var(--ai-cyan);
+            font-weight: bold;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .stat-box {
+            background: rgba(2, 6, 23, 0.6);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid rgba(188, 19, 254, 0.3);
+            box-shadow: 0 0 10px var(--ai-purple-glow);
+        }
+
+        .stat-box p { font-size: 1.8rem; font-weight: bold; margin: 0; color: white; text-shadow: 0 0 10px var(--ai-cyan); }
+        .stat-box h4 { font-size: 0.75rem; color: var(--text-dim); margin: 5px 0 0 0; text-transform: uppercase; }
+
+        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-top: 10px;}
+        th, td { text-align: left; padding: 12px; border-bottom: 1px solid rgba(0, 243, 255, 0.2); }
+        th { color: var(--ai-cyan); font-weight: bold; text-transform: uppercase; }
+
+        .hidden { display: none !important; }
+        .hint { font-size: 0.75rem; color: var(--text-dim); margin-top: -5px; margin-bottom: 10px; }
+
+        /* Schedule Modal Styling */
+        .modal {
+            display: none; 
+            position: fixed; 
+            z-index: 1000; 
+            left: 0;
+            top: 0;
+            width: 100%; 
+            height: 100%; 
+            overflow: auto; 
+            background-color: rgba(2, 6, 23, 0.85); 
+            backdrop-filter: blur(8px);
+        }
+
+        .modal-content {
+            background-color: var(--card-dark);
+            margin: 5% auto; 
+            padding: 25px;
+            border: 1px solid var(--ai-cyan);
+            box-shadow: 0 0 30px var(--ai-cyan-glow);
+            width: 90%;
+            max-width: 800px;
+            border-radius: 12px;
+            color: var(--text-light);
+        }
+
+        .close {
+            color: var(--ai-cyan);
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .close:hover {
+            color: white;
+            text-shadow: 0 0 10px var(--ai-cyan);
+        }
+
+        .schedule-table th, .schedule-table td {
+            border: 1px solid rgba(0, 243, 255, 0.2);
+            padding: 12px;
+            vertical-align: top;
+        }
+        .schedule-table th {
+            background-color: rgba(0, 243, 255, 0.1);
+            color: var(--ai-cyan);
+        }
     </style>
 </head>
 <body>
 
 <header>
-    <h3>Fakulti Sains dan Teknologi Pertahanan (FSTP), UPNM</h3>
-    <h2>AI AND CYBER SECURITY AS THE VANGUARD OF DIGITAL DEFENCE</h2>
-    <p>23 APRIL 2026 (KHAMIS) | BALLROOM 2, ARAS 3, MITEC</p>
+    <h3>Organisr: Fakulti Sains dan Teknologi Pertahanan (FSTP), UPNM</h3>
+    <h2>AI and Cyber Security as the Vanguard of Digital Defence</h2>
+    <p>23 April 2026 | Ballroom 2, MITEC | Digital Q&A System</p>
 </header>
 
 <section id="regSection" class="card">
-    <h3>User Registration</h3>
-    <input type="text" id="regName" placeholder="Full Name (Unique ID)" required>
-    <input type="email" id="regEmail" placeholder="Email (must contain @)" required>
+    <h3 style="color: var(--ai-cyan); text-align: center; margin-top: 0;">USER REGISTRATION</h3>
+    <input type="text" id="regName" placeholder="Full Name" required>
+    
+    <input type="email" id="regEmail" placeholder="Email (e.g. user@gmail.com)" required>
+    
     <input type="password" id="regPass" placeholder="Create Password" required>
-    <p class="hint">Max 8 characters, must include exactly 2 numbers.</p>
+    <p class="hint">Security Policy: Max 8 characters, exactly 2 numbers.</p>
+    
     <select id="regRole" onchange="toggleCodeField()">
         <option value="Audience">Audience</option>
         <option value="Moderator">Moderator</option>
         <option value="Admin">Admin</option>
     </select>
-    <div id="codeGroup" class="hidden"><input type="password" id="regCode" placeholder="Enter Role Access Code"></div>
-    <button onclick="registerUser()" class="btn">Register</button>
-    <p style="text-align:center; font-size:0.8rem;">Already registered? <a href="#" onclick="showView('loginSection')" style="color:var(--cyber-green)">Login here</a></p>
+    
+    <div id="codeGroup" class="hidden"><input type="password" id="regCode" placeholder="System Access Code"></div>
+    <button onclick="registerUser()" class="btn">Initialize Account</button>
+    <p style="text-align:center; font-size:0.85rem; margin-top:20px; color: var(--text-dim);">
+        Already registered? <a href="#" onclick="showView('loginSection')" style="color:var(--ai-cyan); text-decoration: none; font-weight: bold;">Login Here</a>
+    </p>
 </section>
 
 <section id="loginSection" class="card hidden">
-    <h3>Secure Login</h3>
+    <h3 style="color: var(--ai-cyan); text-align: center; margin-top: 0;">SECURE LOGIN</h3>
     <input type="email" id="loginEmail" placeholder="Email Address">
     <input type="password" id="loginPassword" placeholder="Password">
-    <button onclick="loginUser()" class="btn">Login</button>
-    <button onclick="showView('regSection')" class="btn btn-secondary">Register New Account</button>
+    <button onclick="loginUser()" class="btn">Authenticate</button>
+    <button onclick="showView('regSection')" class="btn btn-secondary">Create New Profile</button>
 </section>
 
-<section id="audienceDashboard" class="card hidden" style="text-align: center;">
-    <h3>Welcome, <span id="userDisplayName"></span></h3>
-    <div id="qrcode"></div>
-    <p style="font-size: 0.85rem;">Scan this QR at MITEC for Attendance</p>
-    <button onclick="showSchedule()" class="btn" style="background: var(--cyber-green); color: var(--primary-blue);">View Full Forum Schedule</button>
-    <button onclick="logout()" class="btn logout-btn">Logout</button>
+<section id="audienceDashboard" class="card hidden">
+    <h3 style="color: var(--ai-cyan); border-bottom: 1px solid var(--ai-cyan-glow); padding-bottom: 10px;">Welcome to the Forum</h3>
+    
+    <button onclick="openSchedule()" class="btn" style="margin-bottom: 25px;">View Event Schedule</button>
+
+    <h4 style="margin-bottom: 5px;">Submit a Question</h4>
+    <p style="font-size: 0.8rem; color: var(--text-dim); margin-top: 0;">Data is securely routed to the moderator queue.</p>
+    
+    <select id="targetPanelist">
+        <option value="">-- Optional: Direct question to a specific panelist --</option>
+        <option value="Dato' Seri Dr. Ahmad Jailani">Dato' Seri Dr. Ahmad Jailani (PSC)</option>
+        <option value="Laksamana Muda Dato' Fadhil">Laksamana Muda Dato' Fadhil (BSEP)</option>
+        <option value="Dato' Nonee Ashirin">Dato' Nonee Ashirin (CDIM)</option>
+        <option value="Prof. Ts. Dr. Noor Afiza">Prof. Ts. Dr. Noor Afiza (NDUM)</option>
+    </select>
+
+    <textarea id="userQuestion" rows="4" placeholder="Type your inquiry here..."></textarea>
+    
+    <div style="display: flex; align-items: center; gap: 10px; font-size: 0.85rem; color: var(--ai-purple); margin: 10px 0;">
+        <input type="checkbox" id="anonCheck" style="width: auto; margin: 0; accent-color: var(--ai-purple);">
+        <label for="anonCheck"><strong>Ghost Mode:</strong> Submit Anonymously</label>
+    </div>
+
+    <button onclick="submitQuestion()" class="btn">Transmit Question</button>
+    <button onclick="logout()" class="btn logout-btn">Disconnect</button>
 </section>
 
-<div id="scheduleModal" class="modal hidden">
+<div id="scheduleModal" class="modal">
     <div class="modal-content">
-        <h3 style="color: var(--accent-gold); text-align: center; margin-bottom: 20px;">ATUR CARA MAJLIS</h3>
-        <table>
-            <thead><tr><th style="width: 80px;">MASA</th><th>ATUR CARA</th></tr></thead>
-            <tbody>
-                <tr><td>9.30 am</td><td>Ketibaan tetamu jemputan dan pendaftaran peserta</td></tr>
-                <tr><td>9.40 am</td><td>Ketibaan tetamu kehormat</td></tr>
-                <tr><td>9.45 am</td><td>Ketibaan Menteri Pertahanan</td></tr>
-                <tr><td>9.50 am</td><td>Nyanyian Lagu Negaraku</td></tr>
-                <tr><td>9.55 am</td><td>Tayangan Montaj Program</td></tr>
-                <tr><td>10.00 am</td><td>Ucapan Aluan oleh YBhg. Lt Jen Datuk Wira Arman Rumaizi bin Hj Ahmad, Naib Canselor UPNM</td></tr>
-                <tr><td>10.10 am</td><td>Sesi Keynote Address oleh YB Dato' Seri Diraja Dr. Zambry bin Abdul Kadir, Menteri Pendidikan Tinggi</td></tr>
-                <tr><td>10.25 am</td><td>Sesi Keynote Address oleh YB Dato' Seri Haji Mohamed Khaled bin Nordin, Menteri Pertahanan</td></tr>
-                <tr><td>10.40 am</td><td>Penyampaian cenderahati kepada YB Menteri Pendidikan Tinggi dan YB Menteri Pertahanan</td></tr>
-                <tr><td>10.50 am</td><td>
+        <span class="close" onclick="closeSchedule()">&times;</span>
+        <h2 style="text-align: center; color: var(--ai-cyan); text-shadow: 0 0 10px var(--ai-cyan-glow);">ATUR CARA MAJLIS</h2>
+        <p style="text-align: center; font-size: 0.9rem; color: var(--text-dim);">AI AND CYBER SECURITY AS THE VANGUARD OF DIGITAL DEFENCE<br>23 APRIL 2026 (KHAMIS) | BALLROOM 2, ARAS 3, MITEC</p>
+        
+        <table class="schedule-table">
+            <tr><th style="width: 100px;">MASA</th><th>ATUR CARA</th></tr>
+            <tr><td>9.30 am</td><td>Ketibaan tetamu jemputan dan pendaftaran peserta</td></tr>
+            <tr><td>9.40 am</td><td>Ketibaan tetamu kehormat</td></tr>
+            <tr><td>9.45 am</td><td>Ketibaan Menteri Pertahanan</td></tr>
+            <tr><td>9.50 am</td><td>Nyanyian Lagu Negaraku</td></tr>
+            <tr><td>9.55 am</td><td>Tayangan Montaj Program</td></tr>
+            <tr><td>10.00 am</td><td>Ucapan Aluan oleh YBhg. Lt Jen Datuk Wira Arman Rumaizi bin Hj Ahmad, Naib Canselor Universiti Pertahanan Nasional Malaysia</td></tr>
+            <tr><td>10.10 am</td><td>Sesi Keynote Address oleh Yang Berhormat Dato' Seri Diraja Dr. Zambry bin Abdul Kadir, Menteri Pendidikan Tinggi</td></tr>
+            <tr><td>10.25 am</td><td>Sesi Keynote Address oleh Yang Berhormat Dato' Seri Haji Mohamed Khaled bin Nordin, Menteri Pertahanan</td></tr>
+            <tr>
+                <td>10.50 am</td>
+                <td>
                     <strong>Sesi Forum: AI and Cyber Security as the Vanguard of Digital Defence</strong><br>
-                    <small>Moderator: Kol. Prof. Dr. Khairol Amali bin Ahmad (Bersara)</small>
-                    <div class="panelist-info">
-                        <strong>Panelis:</strong><br>
-                        • YBhg. Dato' Seri Dr. Ahmad Jailani bin Muhamed Yunus (SPA)<br>
-                        <span class="topic-text">Topik: Perspektif Perkhidmatan Awam: Dasar Sedia Ada dan Strategi Masa Hadapan.</span><br>
-                        
-                        • YBhg. Laksamana Muda Dato' Fadhil bin Abdul Rahman (BSEP, ATM)<br>
-                        <span class="topic-text">Topik: Pembinaan Kesiapsiagaan Pertahanan Siber Negara dalam Era Konflik.</span><br>
-                        
-                        • YBhg. Dato' Nonee Ashirin binti Dato' Mohd Radzi (CDIM)<br>
-                        <span class="topic-text">Topik: Kerjasama Industri dalam Pembentukan Ekosistem Pertahanan.</span><br>
-                        
-                        • YBhg. Prof. Ts. Dr. Noor Afiza binti Mat Razali (UPNM)<br>
-                        <span class="topic-text">Topik: Pembentukan Modal Insan Berteraskan Teknologi Pertahanan.</span>
-                    </div>
-                </td></tr>
-                <tr><td>12.30 pm</td><td>Tamat / Sesi Interaksi & Jaringan</td></tr>
-            </tbody>
+                    <span style="color: var(--ai-purple);">Moderator: Kol. Prof. Dr. Khairol Amali bin Ahmad (Bersara)</span><br><br>
+                    <strong>Panelis:</strong><br>
+                    • YBhg. Dato' Seri Dr. Ahmad Jailani bin Muhamed Yunus (Pengerusi, Suruhanjaya Perkhidmatan Awam Malaysia)<br>
+                    • YBhg. Laksamana Muda Dato' Fadhil bin Abdul Rahman (Pengarah, BSEP, ATM)<br>
+                    • YBhg. Dato' Nonee Ashirin binti Dato' Mohd Radzi (Presiden, CDIM)<br>
+                    • YBhg. Prof. Ts. Dr. Noor Afiza binti Mat Razali (Profesor AI & Keselamatan Siber, UPNM)<br><br>
+                    Sesi Soal Jawab
+                </td>
+            </tr>
+            <tr><td>12.30 pm</td><td>Tamat / Sesi Interaksi & Jaringan</td></tr>
         </table>
-        <button onclick="hideSchedule()" class="btn">Close Schedule</button>
     </div>
 </div>
 
-<section id="moderatorDashboard" class="card hidden">
-    <h3>Moderator View</h3>
-    <div id="reader"></div>
-    <p id="scanStatus" style="color:var(--cyber-green); text-align:center; margin-top:10px; font-weight:bold;"></p>
-    <h4>Attendance List:</h4>
-    <table>
-        <thead><tr><th>Name</th><th>Email</th><th>Status</th></tr></thead>
-        <tbody id="attendanceTableBody"></tbody>
-    </table>
-    <button onclick="logout()" class="btn logout-btn">Logout</button>
+<section id="moderatorDashboard" class="card hidden" style="max-width: 600px;">
+    <h3 style="color: var(--ai-cyan); text-align: center;">MODERATOR TERMINAL</h3>
+    <div class="stats-grid">
+        <div class="stat-box"><p id="modTotal">0</p><h4>Total Received</h4></div>
+        <div class="stat-box"><p id="modPending">0</p><h4>Pending Scan</h4></div>
+    </div>
+    <div id="moderatorQueue"></div>
+    <button onclick="logout()" class="btn logout-btn">Disconnect</button>
 </section>
 
-<section id="adminDashboard" class="card hidden">
-    <h3>Admin: Master User Records</h3>
+<section id="adminDashboard" class="card hidden" style="max-width: 700px;">
+    <h3 style="color: var(--ai-purple); text-shadow: 0 0 10px var(--ai-purple-glow); text-align: center;">ADMINISTRATOR OVERSIGHT</h3>
+    
+    <h4 style="color: var(--ai-cyan); border-bottom: 1px solid rgba(0, 243, 255, 0.2); padding-bottom: 5px;">User Database</h4>
     <div style="overflow-x: auto;">
-        <table>
-            <thead><tr><th>Name (ID)</th><th>Email</th><th>Password</th><th>Role</th><th>Action</th></tr></thead>
-            <tbody id="adminTableBody"></tbody>
+        <table id="adminUserTable">
+            <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Action</th></tr></thead>
+            <tbody></tbody>
         </table>
     </div>
-    <button onclick="logout()" class="btn logout-btn">Logout</button>
+    
+    <h4 style="margin-top: 30px; color: var(--ai-cyan); border-bottom: 1px solid rgba(0, 243, 255, 0.2); padding-bottom: 5px;">Master Data Stream</h4>
+    <div id="adminQuestionQueue"></div>
+    <button onclick="logout()" class="btn logout-btn">Disconnect Session</button>
 </section>
 
 <script>
     let usersDb = JSON.parse(localStorage.getItem('dsa_users')) || [];
-    let attendanceDb = JSON.parse(localStorage.getItem('dsa_attendance')) || [];
-    let html5QrCode;
+    let questionsDb = JSON.parse(localStorage.getItem('dsa_questions')) || [];
+    let currentUser = null;
 
     const CODES = { Moderator: "MOD2026", Admin: "ADMIN99" };
 
-    function showView(id) {
-        ['regSection', 'loginSection', 'audienceDashboard', 'moderatorDashboard', 'adminDashboard'].forEach(v => document.getElementById(v).classList.add('hidden'));
-        document.getElementById(id).classList.remove('hidden');
+    function showView(viewId) {
+        ['regSection', 'loginSection', 'audienceDashboard', 'moderatorDashboard', 'adminDashboard'].forEach(id => document.getElementById(id).classList.add('hidden'));
+        document.getElementById(viewId).classList.remove('hidden');
     }
 
     function toggleCodeField() {
         document.getElementById('codeGroup').className = (document.getElementById('regRole').value === "Audience") ? "hidden" : "";
     }
 
-    function showSchedule() { document.getElementById('scheduleModal').classList.remove('hidden'); }
-    function hideSchedule() { document.getElementById('scheduleModal').classList.add('hidden'); }
-
     function validatePassword(pass) {
-        if (pass.length > 8) return { valid: false, msg: "Password must be maximum 8 characters." };
+        if (pass.length > 8) return { valid: false, msg: "Security Policy Violation: Password must be maximum 8 characters." };
         const digitCount = (pass.match(/\d/g) || []).length;
-        if (digitCount !== 2) return { valid: false, msg: "Password must contain exactly 2 numbers." };
+        if (digitCount !== 2) return { valid: false, msg: "Security Policy Violation: Password must contain exactly 2 numbers." };
         return { valid: true };
+    }
+
+    // STRICT EMAIL VALIDATION USING REGEX
+    function validateEmail(email) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
     }
 
     function registerUser() {
@@ -172,88 +412,138 @@
         const role = document.getElementById('regRole').value;
         const code = document.getElementById('regCode').value;
 
-        if (!email.includes("@")) return alert("Invalid Email: Missing '@' symbol.");
-        if(!name || !email || !pass) return alert("Fill all fields");
+        if(!name || !email || !pass) return alert("System Error: All fields are required.");
+        
+        // NEW STRICT EMAIL CHECK
+        if (!validateEmail(email)) return alert("Format Error: Please enter a properly formatted email address (e.g., user@domain.com).");
+        
         const passCheck = validatePassword(pass);
         if (!passCheck.valid) return alert(passCheck.msg);
-        if(usersDb.some(u => u.name.toLowerCase() === name.toLowerCase())) return alert("This Name ID is already taken!");
-        if(role !== "Audience" && code !== CODES[role]) return alert("Invalid Security Code");
+        
+        if(usersDb.some(u => u.email.toLowerCase() === email.toLowerCase())) return alert("Conflict: This Email is already registered in the system.");
+        if(role !== "Audience" && code !== CODES[role]) return alert("Access Denied: Invalid Authorization Code.");
 
         usersDb.push({ name, email, pass, role });
         localStorage.setItem('dsa_users', JSON.stringify(usersDb));
-        alert("Registration Successful!");
+        alert("Registration Successful. Database Updated.");
         showView('loginSection');
     }
 
     function loginUser() {
         const email = document.getElementById('loginEmail').value.trim();
         const pass = document.getElementById('loginPassword').value;
-        const user = usersDb.find(u => u.email === email && u.pass === pass);
+        const user = usersDb.find(u => u.email.toLowerCase() === email.toLowerCase() && u.pass === pass);
 
         if (user) {
-            if (user.role === "Audience") {
-                showView('audienceDashboard');
-                document.getElementById('userDisplayName').innerText = user.name;
-                document.getElementById('qrcode').innerHTML = "";
-                new QRCode(document.getElementById("qrcode"), { text: user.name, width: 160, height: 160 });
-            } else if (user.role === "Moderator") {
-                showView('moderatorDashboard');
-                renderAttendance();
-                startScanner();
-            } else {
-                showView('adminDashboard');
-                updateAdminTable();
-            }
-        } else alert("Invalid Login Credentials.");
+            currentUser = user;
+            if (user.role === "Audience") showView('audienceDashboard');
+            else if (user.role === "Moderator") { showView('moderatorDashboard'); renderModeratorView(); }
+            else { showView('adminDashboard'); renderAdminView(); }
+        } else alert("Authentication Failed. Check your credentials.");
     }
 
-    function updateAdminTable() {
-        showView('adminDashboard');
-        const body = document.getElementById('adminTableBody');
-        body.innerHTML = ""; 
-        usersDb.forEach((u, i) => {
-            body.innerHTML += `<tr>
-                <td>${u.name}</td><td>${u.email}</td><td>${u.pass}</td><td>${u.role}</td>
-                <td><button onclick="deleteUser(${i})" style="background:#ff4d4d; border:none; color:white; padding:5px; border-radius:3px; cursor:pointer;">Remove</button></td>
-            </tr>`;
+    // Modal Functions
+    function openSchedule() { document.getElementById('scheduleModal').style.display = "block"; }
+    function closeSchedule() { document.getElementById('scheduleModal').style.display = "none"; }
+    window.onclick = function(event) {
+        let modal = document.getElementById('scheduleModal');
+        if (event.target == modal) { modal.style.display = "none"; }
+    }
+
+    function submitQuestion() {
+        const text = document.getElementById('userQuestion').value.trim();
+        const isAnon = document.getElementById('anonCheck').checked;
+        const target = document.getElementById('targetPanelist').value;
+
+        if (!text) return alert("System Error: Question field cannot be empty.");
+        
+        questionsDb.push({
+            id: Date.now(),
+            user: currentUser.name,
+            text: text,
+            status: 'pending',
+            anonymous: isAnon,
+            target: target
         });
+        localStorage.setItem('dsa_questions', JSON.stringify(questionsDb));
+        
+        document.getElementById('userQuestion').value = "";
+        document.getElementById('anonCheck').checked = false;
+        document.getElementById('targetPanelist').value = "";
+        alert("Transmission Successful.");
+    }
+
+    function renderModeratorView() {
+        const queue = document.getElementById('moderatorQueue');
+        const pendingCount = questionsDb.filter(q => q.status === 'pending').length;
+        document.getElementById('modTotal').innerText = questionsDb.length;
+        document.getElementById('modPending').innerText = pendingCount;
+        
+        queue.innerHTML = questionsDb.map(q => `
+            <div class="q-item q-${q.status}">
+                <div class="q-meta">
+                    <span>Source: <span style="color:white;">${q.anonymous ? "GHOST_USER" : q.user}</span></span>
+                    <span style="color: ${q.status === 'done' ? '#10b981' : (q.status === 'skipped' ? '#ef4444' : '#00f3ff')}">STATUS: ${q.status.toUpperCase()}</span>
+                </div>
+                ${q.target ? `<span class="q-target">Target: ${q.target}</span>` : ''}
+                <p style="margin: 10px 0; color: white;">${q.text}</p>
+                <div style="display: flex; gap: 10px;">
+                    <button onclick="updateQuestionStatus(${q.id}, 'done')" class="btn" style="padding:8px; font-size:10px; margin:0; background:#10b981; box-shadow:none;">Mark Done</button>
+                    <button onclick="updateQuestionStatus(${q.id}, 'skipped')" class="btn btn-secondary" style="padding:8px; font-size:10px; margin:0; border-color: #ef4444; color: #ef4444;">Skip</button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function updateQuestionStatus(questionId, newStatus) {
+        const q = questionsDb.find(q => q.id === questionId);
+        if (q) q.status = newStatus;
+        localStorage.setItem('dsa_questions', JSON.stringify(questionsDb));
+        renderModeratorView();
+    }
+
+    function renderAdminView() {
+        const userBody = document.querySelector('#adminUserTable tbody');
+        userBody.innerHTML = usersDb.map((u, i) => `
+            <tr>
+                <td style="color:white;">${u.name}</td><td>${u.email}</td><td>${u.role}</td>
+                <td><button onclick="deleteUser(${i})" style="color:var(--error-red); background:none; border:none; cursor:pointer; font-weight:bold;">PURGE</button></td>
+            </tr>
+        `).join('');
+
+        const questionQueue = document.getElementById('adminQuestionQueue');
+        questionQueue.innerHTML = questionsDb.map(q => `
+            <div class="q-item q-${q.status}" style="border-left-color: ${q.status === 'done' ? '#10b981' : (q.status === 'skipped' ? '#ef4444' : 'var(--ai-cyan)')}">
+                <div class="q-meta">
+                    <span>Origin: <span style="color:white;">${q.user} ${q.anonymous ? "(HIDDEN FLAG)" : ""}</span></span>
+                    <span>State: ${q.status.toUpperCase()}</span>
+                </div>
+                ${q.target ? `<span class="q-target">Route: ${q.target}</span>` : ''}
+                <p style="margin: 5px 0; color: white;">${q.text}</p>
+                <button onclick="adminDeleteQuestion(${q.id})" style="color:var(--error-red); background:none; border:none; font-size:10px; cursor:pointer; font-weight:bold; letter-spacing:1px; margin-top:10px;">DELETE RECORD</button>
+            </div>
+        `).join('');
     }
 
     function deleteUser(index) {
-        if(confirm("Are you sure you want to remove " + usersDb[index].name + "?")) {
+        if(confirm("WARNING: Permanent purge of user data. Proceed?")) {
             usersDb.splice(index, 1);
             localStorage.setItem('dsa_users', JSON.stringify(usersDb));
-            updateAdminTable();
+            renderAdminView();
         }
     }
 
-    function startScanner() {
-        html5QrCode = new Html5Qrcode("reader");
-        html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 },
-            (decodedText) => {
-                const attendee = usersDb.find(u => u.name === decodedText);
-                if (attendee) {
-                    if (!attendanceDb.some(a => a.name === attendee.name)) {
-                        attendanceDb.push({ name: attendee.name, email: attendee.email });
-                        localStorage.setItem('dsa_attendance', JSON.stringify(attendanceDb));
-                        document.getElementById('scanStatus').innerText = "✅ Verified: " + attendee.name;
-                        renderAttendance();
-                    }
-                }
-            }).catch(err => console.error("Scanner failed", err));
-    }
-
-    function renderAttendance() {
-        document.getElementById('attendanceTableBody').innerHTML = attendanceDb.map(a => 
-            `<tr><td>${a.name}</td><td>${a.email}</td><td style="color:var(--cyber-green)">PRESENT</td></tr>`).join('');
+    function adminDeleteQuestion(questionId) {
+        if(confirm("WARNING: Irreversible deletion from master log. Proceed?")) {
+            questionsDb = questionsDb.filter(q => q.id !== questionId);
+            localStorage.setItem('dsa_questions', JSON.stringify(questionsDb));
+            renderAdminView();
+        }
     }
 
     function logout() {
-        if (html5QrCode && html5QrCode.isScanning) {
-            html5QrCode.stop().then(() => showView('loginSection'));
-        } else {
-            showView('loginSection');
-        }
+        currentUser = null;
+        showView('loginSection');
     }
 </script>
 </body>
