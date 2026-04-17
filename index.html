@@ -15,8 +15,8 @@
             --card-bg: #112240;
         }
         body { background-color: var(--primary-blue); color: var(--text-light); font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; align-items: center; padding: 20px; }
-        header { text-align: center; border-bottom: 2px solid var(--accent-gold); width: 100%; max-width: 600px; margin-bottom: 20px; }
-        .card { background: var(--card-bg); padding: 25px; border-radius: 12px; width: 100%; max-width: 550px; margin-bottom: 20px; box-sizing: border-box; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        header { text-align: center; border-bottom: 2px solid var(--accent-gold); width: 100%; max-width: 700px; margin-bottom: 20px; }
+        .card { background: var(--card-bg); padding: 25px; border-radius: 12px; width: 100%; max-width: 650px; margin-bottom: 20px; box-sizing: border-box; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         input, select { width: 100%; padding: 12px; margin: 10px 0; background: #1d3557; border: 1px solid #233554; color: white; border-radius: 5px; box-sizing: border-box; }
         .btn { background: var(--accent-gold); color: var(--primary-blue); border: none; padding: 15px; width: 100%; font-weight: bold; cursor: pointer; border-radius: 5px; text-transform: uppercase; margin-top: 10px; }
         .btn-secondary { background: transparent; color: var(--accent-gold); border: 1px solid var(--accent-gold); margin-top: 10px; }
@@ -24,28 +24,32 @@
         #reader { width: 100%; background: black; border-radius: 8px; border: 2px solid var(--accent-gold); overflow: hidden; }
         #qrcode { background: white; padding: 15px; display: inline-block; margin: 20px 0; border: 5px solid white; }
         table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 0.8rem; }
-        th, td { text-align: left; padding: 10px; border-bottom: 1px solid #233554; }
-        th { color: var(--cyber-green); }
+        th, td { text-align: left; padding: 10px; border-bottom: 1px solid #233554; vertical-align: top; }
+        th { color: var(--cyber-green); background: rgba(100, 255, 218, 0.1); }
         .hidden { display: none !important; }
         .hint { font-size: 0.7rem; color: #8892b0; margin-top: -5px; margin-bottom: 10px; }
+        
+        /* Modal for Full Schedule */
+        .modal { background: rgba(10, 25, 47, 0.98); position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 100; overflow-y: auto; padding: 20px; box-sizing: border-box; }
+        .modal-content { max-width: 800px; margin: 0 auto; background: var(--card-bg); padding: 30px; border-radius: 12px; border: 1px solid var(--accent-gold); }
+        .panelist-info { font-size: 0.75rem; color: #ccd6f6; margin-top: 5px; }
+        .topic-text { color: var(--accent-gold); font-style: italic; display: block; margin-top: 3px; }
     </style>
 </head>
 <body>
 
 <header>
-    <h3>UPNM - FSTP [cite: 5, 13]</h3>
-    <h2>AI & CYBER SECURITY FORUM 2026 [cite: 8]</h2>
-    <p>Ballroom 2, MITEC | 23 April 2026 [cite: 38, 41]</p>
+    <h3>Fakulti Sains dan Teknologi Pertahanan (FSTP), UPNM</h3>
+    <h2>AI AND CYBER SECURITY AS THE VANGUARD OF DIGITAL DEFENCE</h2>
+    <p>23 APRIL 2026 (KHAMIS) | BALLROOM 2, ARAS 3, MITEC</p>
 </header>
 
 <section id="regSection" class="card">
-    <h3>User Registration [cite: 2]</h3>
+    <h3>User Registration</h3>
     <input type="text" id="regName" placeholder="Full Name (Unique ID)" required>
     <input type="email" id="regEmail" placeholder="Email (must contain @)" required>
-    
     <input type="password" id="regPass" placeholder="Create Password" required>
     <p class="hint">Max 8 characters, must include exactly 2 numbers.</p>
-    
     <select id="regRole" onchange="toggleCodeField()">
         <option value="Audience">Audience</option>
         <option value="Moderator">Moderator</option>
@@ -67,13 +71,53 @@
 <section id="audienceDashboard" class="card hidden" style="text-align: center;">
     <h3>Welcome, <span id="userDisplayName"></span></h3>
     <div id="qrcode"></div>
-    <p>Permanent QR: Valid for Forum DSA 2026 [cite: 5, 32]</p>
+    <p style="font-size: 0.85rem;">Scan this QR at MITEC for Attendance</p>
+    <button onclick="showSchedule()" class="btn" style="background: var(--cyber-green); color: var(--primary-blue);">View Full Forum Schedule</button>
     <button onclick="logout()" class="btn logout-btn">Logout</button>
 </section>
 
+<div id="scheduleModal" class="modal hidden">
+    <div class="modal-content">
+        <h3 style="color: var(--accent-gold); text-align: center; margin-bottom: 20px;">ATUR CARA MAJLIS</h3>
+        <table>
+            <thead><tr><th style="width: 80px;">MASA</th><th>ATUR CARA</th></tr></thead>
+            <tbody>
+                <tr><td>9.30 am</td><td>Ketibaan tetamu jemputan dan pendaftaran peserta</td></tr>
+                <tr><td>9.40 am</td><td>Ketibaan tetamu kehormat</td></tr>
+                <tr><td>9.45 am</td><td>Ketibaan Menteri Pertahanan</td></tr>
+                <tr><td>9.50 am</td><td>Nyanyian Lagu Negaraku</td></tr>
+                <tr><td>9.55 am</td><td>Tayangan Montaj Program</td></tr>
+                <tr><td>10.00 am</td><td>Ucapan Aluan oleh YBhg. Lt Jen Datuk Wira Arman Rumaizi bin Hj Ahmad, Naib Canselor UPNM</td></tr>
+                <tr><td>10.10 am</td><td>Sesi Keynote Address oleh YB Dato' Seri Diraja Dr. Zambry bin Abdul Kadir, Menteri Pendidikan Tinggi</td></tr>
+                <tr><td>10.25 am</td><td>Sesi Keynote Address oleh YB Dato' Seri Haji Mohamed Khaled bin Nordin, Menteri Pertahanan</td></tr>
+                <tr><td>10.40 am</td><td>Penyampaian cenderahati kepada YB Menteri Pendidikan Tinggi dan YB Menteri Pertahanan</td></tr>
+                <tr><td>10.50 am</td><td>
+                    <strong>Sesi Forum: AI and Cyber Security as the Vanguard of Digital Defence</strong><br>
+                    <small>Moderator: Kol. Prof. Dr. Khairol Amali bin Ahmad (Bersara)</small>
+                    <div class="panelist-info">
+                        <strong>Panelis:</strong><br>
+                        • YBhg. Dato' Seri Dr. Ahmad Jailani bin Muhamed Yunus (SPA)<br>
+                        <span class="topic-text">Topik: Perspektif Perkhidmatan Awam: Dasar Sedia Ada dan Strategi Masa Hadapan.</span><br>
+                        
+                        • YBhg. Laksamana Muda Dato' Fadhil bin Abdul Rahman (BSEP, ATM)<br>
+                        <span class="topic-text">Topik: Pembinaan Kesiapsiagaan Pertahanan Siber Negara dalam Era Konflik.</span><br>
+                        
+                        • YBhg. Dato' Nonee Ashirin binti Dato' Mohd Radzi (CDIM)<br>
+                        <span class="topic-text">Topik: Kerjasama Industri dalam Pembentukan Ekosistem Pertahanan.</span><br>
+                        
+                        • YBhg. Prof. Ts. Dr. Noor Afiza binti Mat Razali (UPNM)<br>
+                        <span class="topic-text">Topik: Pembentukan Modal Insan Berteraskan Teknologi Pertahanan.</span>
+                    </div>
+                </td></tr>
+                <tr><td>12.30 pm</td><td>Tamat / Sesi Interaksi & Jaringan</td></tr>
+            </tbody>
+        </table>
+        <button onclick="hideSchedule()" class="btn">Close Schedule</button>
+    </div>
+</div>
+
 <section id="moderatorDashboard" class="card hidden">
-    <h3>Moderator View [cite: 4]</h3>
-    <p>User: Kol Prof. Dr. Khairol Amali (B) [cite: 30]</p>
+    <h3>Moderator View</h3>
     <div id="reader"></div>
     <p id="scanStatus" style="color:var(--cyber-green); text-align:center; margin-top:10px; font-weight:bold;"></p>
     <h4>Attendance List:</h4>
@@ -85,11 +129,13 @@
 </section>
 
 <section id="adminDashboard" class="card hidden">
-    <h3>Admin View [cite: 4]</h3>
-    <table>
-        <thead><tr><th>Name (ID)</th><th>Email</th><th>Password</th><th>Role</th></tr></thead>
-        <tbody id="adminTableBody"></tbody>
-    </table>
+    <h3>Admin: Master User Records</h3>
+    <div style="overflow-x: auto;">
+        <table>
+            <thead><tr><th>Name (ID)</th><th>Email</th><th>Password</th><th>Role</th><th>Action</th></tr></thead>
+            <tbody id="adminTableBody"></tbody>
+        </table>
+    </div>
     <button onclick="logout()" class="btn logout-btn">Logout</button>
 </section>
 
@@ -109,14 +155,13 @@
         document.getElementById('codeGroup').className = (document.getElementById('regRole').value === "Audience") ? "hidden" : "";
     }
 
+    function showSchedule() { document.getElementById('scheduleModal').classList.remove('hidden'); }
+    function hideSchedule() { document.getElementById('scheduleModal').classList.add('hidden'); }
+
     function validatePassword(pass) {
-        // Check length
         if (pass.length > 8) return { valid: false, msg: "Password must be maximum 8 characters." };
-        
-        // Count numbers using regex
         const digitCount = (pass.match(/\d/g) || []).length;
         if (digitCount !== 2) return { valid: false, msg: "Password must contain exactly 2 numbers." };
-        
         return { valid: true };
     }
 
@@ -127,13 +172,10 @@
         const role = document.getElementById('regRole').value;
         const code = document.getElementById('regCode').value;
 
-        // Validations
         if (!email.includes("@")) return alert("Invalid Email: Missing '@' symbol.");
         if(!name || !email || !pass) return alert("Fill all fields");
-        
         const passCheck = validatePassword(pass);
         if (!passCheck.valid) return alert(passCheck.msg);
-
         if(usersDb.some(u => u.name.toLowerCase() === name.toLowerCase())) return alert("This Name ID is already taken!");
         if(role !== "Audience" && code !== CODES[role]) return alert("Invalid Security Code");
 
@@ -160,10 +202,29 @@
                 startScanner();
             } else {
                 showView('adminDashboard');
-                document.getElementById('adminTableBody').innerHTML = usersDb.map(u => 
-                    `<tr><td>${u.name}</td><td>${u.email}</td><td>${u.pass}</td><td>${u.role}</td></tr>`).join('');
+                updateAdminTable();
             }
         } else alert("Invalid Login Credentials.");
+    }
+
+    function updateAdminTable() {
+        showView('adminDashboard');
+        const body = document.getElementById('adminTableBody');
+        body.innerHTML = ""; 
+        usersDb.forEach((u, i) => {
+            body.innerHTML += `<tr>
+                <td>${u.name}</td><td>${u.email}</td><td>${u.pass}</td><td>${u.role}</td>
+                <td><button onclick="deleteUser(${i})" style="background:#ff4d4d; border:none; color:white; padding:5px; border-radius:3px; cursor:pointer;">Remove</button></td>
+            </tr>`;
+        });
+    }
+
+    function deleteUser(index) {
+        if(confirm("Are you sure you want to remove " + usersDb[index].name + "?")) {
+            usersDb.splice(index, 1);
+            localStorage.setItem('dsa_users', JSON.stringify(usersDb));
+            updateAdminTable();
+        }
     }
 
     function startScanner() {
@@ -177,8 +238,6 @@
                         localStorage.setItem('dsa_attendance', JSON.stringify(attendanceDb));
                         document.getElementById('scanStatus').innerText = "✅ Verified: " + attendee.name;
                         renderAttendance();
-                    } else {
-                        document.getElementById('scanStatus').innerText = "⚠️ Already checked in.";
                     }
                 }
             }).catch(err => console.error("Scanner failed", err));
