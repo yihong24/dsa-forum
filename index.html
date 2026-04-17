@@ -254,17 +254,15 @@
 <body>
 
 <header>
-    <h3>Organisr: Fakulti Sains dan Teknologi Pertahanan (FSTP), UPNM</h3>
-    <h2>AI and Cyber Security as the Vanguard of Digital Defence</h2>
-    <p>23 April 2026 | Ballroom 2, MITEC | Digital Q&A System</p>
+    <h3>UPNM - FSTP</h3>
+    <h2>AI & CYBER SECURITY FORUM 2026</h2>
+    <p>Ballroom 2, MITEC | Digital Q&A System</p>
 </header>
 
 <section id="regSection" class="card">
     <h3 style="color: var(--ai-cyan); text-align: center; margin-top: 0;">USER REGISTRATION</h3>
     <input type="text" id="regName" placeholder="Full Name" required>
-    
     <input type="email" id="regEmail" placeholder="Email (e.g. user@gmail.com)" required>
-    
     <input type="password" id="regPass" placeholder="Create Password" required>
     <p class="hint">Security Policy: Max 8 characters, exactly 2 numbers.</p>
     
@@ -360,13 +358,13 @@
     <button onclick="logout()" class="btn logout-btn">Disconnect</button>
 </section>
 
-<section id="adminDashboard" class="card hidden" style="max-width: 700px;">
+<section id="adminDashboard" class="card hidden" style="max-width: 800px;">
     <h3 style="color: var(--ai-purple); text-shadow: 0 0 10px var(--ai-purple-glow); text-align: center;">ADMINISTRATOR OVERSIGHT</h3>
     
     <h4 style="color: var(--ai-cyan); border-bottom: 1px solid rgba(0, 243, 255, 0.2); padding-bottom: 5px;">User Database</h4>
     <div style="overflow-x: auto;">
         <table id="adminUserTable">
-            <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Action</th></tr></thead>
+            <thead><tr><th>Name</th><th>Email</th><th>Password</th><th>Role</th><th>Action</th></tr></thead>
             <tbody></tbody>
         </table>
     </div>
@@ -414,7 +412,6 @@
 
         if(!name || !email || !pass) return alert("System Error: All fields are required.");
         
-        // NEW STRICT EMAIL CHECK
         if (!validateEmail(email)) return alert("Format Error: Please enter a properly formatted email address (e.g., user@domain.com).");
         
         const passCheck = validatePassword(pass);
@@ -504,9 +501,14 @@
 
     function renderAdminView() {
         const userBody = document.querySelector('#adminUserTable tbody');
+        
+        // ADDED: Displaying ${u.pass} directly in the table
         userBody.innerHTML = usersDb.map((u, i) => `
             <tr>
-                <td style="color:white;">${u.name}</td><td>${u.email}</td><td>${u.role}</td>
+                <td style="color:white;">${u.name}</td>
+                <td>${u.email}</td>
+                <td style="color: var(--ai-purple); font-family: monospace;">${u.pass}</td>
+                <td>${u.role}</td>
                 <td><button onclick="deleteUser(${i})" style="color:var(--error-red); background:none; border:none; cursor:pointer; font-weight:bold;">PURGE</button></td>
             </tr>
         `).join('');
